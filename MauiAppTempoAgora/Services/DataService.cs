@@ -10,16 +10,21 @@ namespace MauiAppTempoAgora.Services
             Tempo? t = null;
 
             string chave = "c7f9c444fd2d9c7683d13675f2bb12f2";
-
-            string url = $"https://api.openweathermap.org/data/2.5/weather?" +
-                         $"q={cidade}&units=metric&appid={chave}";
+            string url = $"https://api.openweathermap.org/data/2.5/weather?q={cidade}&units=metric&appid={chave}";
 
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage resp = await client.GetAsync(url);
-
-                if (resp.IsSuccessStatusCode)
+                try
                 {
+                    HttpResponseMessage resp = await client.GetAsync(url);
+
+                    if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        return null; // cidade não encontrada
+                    }
+
+                    resp.EnsureSuccessStatusCode(); // lança erro para outros códigos
+
                     string json = await resp.Content.ReadAsStringAsync();
 
                     var rascunho = JObject.Parse(json);
@@ -38,11 +43,15 @@ namespace MauiAppTempoAgora.Services
                         temp_max = (double)rascunho["main"]["temp_max"],
                         speed = (double)rascunho["wind"]["speed"],
                         visibility = (int)rascunho["visibility"],
-                        sunrise = sunrise.ToString(),
-                        sunset = sunset.ToString(),
-                    }; // Fecha obj do Tempo.
-                } // Fecha if se o status do servidor foi de sucesso
-            } // fecha laço using
+                        sunrise = sunrise.ToString("HH:mm"),
+                        sunset = sunset.ToString("HH:mm"),
+                    };
+                }
+                catch (HttpRequestException)
+                {
+                    throw; // será tratado no MainPage
+                }
+            }
 
             return t;
         }

@@ -5,8 +5,6 @@ namespace MauiAppTempoAgora
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
-
         public MainPage()
         {
             InitializeComponent();
@@ -22,30 +20,31 @@ namespace MauiAppTempoAgora
 
                     if (t != null)
                     {
-                        string dados_previsao = "";
-
-                        dados_previsao = $"Latitude: {t.lat} \n" +
-                                         $"Longitude: {t.lon} \n" +
-                                         $"Nascer do Sol: {t.sunrise} \n" +
-                                         $"Por do Sol: {t.sunset} \n" +
-                                         $"Temp Máx: {t.temp_max} \n" +
-                                         $"Temp Min: {t.temp_min} \n";
+                        string dados_previsao = $"Latitude: {t.lat}\n" +
+                                                $"Longitude: {t.lon}\n" +
+                                                $"Nascer do Sol: {t.sunrise}\n" +
+                                                $"Por do Sol: {t.sunset}\n" +
+                                                $"Temp Máx: {t.temp_max}°C\n" +
+                                                $"Temp Min: {t.temp_min}°C\n" +
+                                                $"Clima: {t.main} - {t.description}\n" +
+                                                $"Velocidade do Vento: {t.speed} m/s\n" +
+                                                $"Visibilidade: {t.visibility} m";
 
                         lbl_res.Text = dados_previsao;
-
                     }
                     else
                     {
-
-                        lbl_res.Text = "Sem dados de Previsão";
+                        await DisplayAlert("Cidade não encontrada", "Não foi possível encontrar cidade informada.", "OK");
                     }
-
                 }
                 else
                 {
                     lbl_res.Text = "Preencha a cidade.";
                 }
-
+            }
+            catch (HttpRequestException)
+            {
+                await DisplayAlert("Sem conexão", "Verifique sua conexão com a internet.", "OK");
             }
             catch (Exception ex)
             {
@@ -53,5 +52,4 @@ namespace MauiAppTempoAgora
             }
         }
     }
-
 }
